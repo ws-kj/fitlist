@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %} Create Workout | FitList {% endblock %}
+
+{% block content %}
+<script type="text/jsx">
+class CreateWorkoutForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            title: '',
+            content: '',
+            frequency: 0,
+            tags: '',
+            tag_array: []
+        };
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+
+        this.setState({
+            [name]: value
+        });
+
+        if(name =="tags") {
+            this.state.tag_array = value.trim().split(',');
+            this.state.tag_array = this.state.tag_array.filter(e => e);
+        }
+
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+        
+        axios.post('workout_created', {
+            title: this.state.title,
+            content: this.state.content,
+            frequency: this.state.frequency,
+            tags: this.state.tag_array
+        })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    render() {
+        return (
+            <div>
+            <form onSubmit={this.handleSubmit}>
+                    Title 
+                    <input type="text" name="title" value={this.state.title} onChange={this.handleChange}/>
+                    Content 
+                    <textarea type="text" name="content" value={this.state.content} onChange={this.handleChange}/>
+                    Frequency
+                    <select name="frequency" value={this.state.frequency} onChange={this.handleChange}>
+                        <option>0</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                    Tags
+                    <textarea type="text" name="tags" value={this.state.tags} onChange={this.handleChange}/>
+                <input type="submit" value="Create"/>
+            </form>
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(
+    <CreateWorkoutForm/>,
+    document.getElementById('content')
+);
+</script>
+{% endblock %}

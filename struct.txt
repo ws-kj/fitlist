@@ -1,0 +1,56 @@
+*** Structures ***
+
+[Workout]
+id: int
+title: str
+date_created: datetime
+author_id: int
+primary_tag: str
+tags: str[]
+likes: int
+dislikes: int
+stars: int
+formlink: str
+content(md): str
+length: int (optional)
+
+[Review]
+id: int
+timestamp: datetime
+workout_id: int
+author_id: int
+likes: int
+dislikes: int
+rating: int (1-5)
+content(md): str
+length_followed: str
+before_pic: str (optional)
+after_pic: str (optional)
+
+[Question]
+id: int
+timestamp: datetime
+author_id: int
+likes: int
+dislikes: int
+content: str
+
+[Answer]
+id: int
+timestamp: datetime
+author_id: int
+likes: int
+dislikes: int
+content: str
+
+[User]
+id: int
+username: str
+profile_pic: str
+age: int (optional)
+location: str (optional)
+date_created: datetime
+bio: str
+likes: int
+dislikes: int
+

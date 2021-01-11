@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %} Browse Workouts | FitList {% endblock %}
+
+{% block content %}
+<script type="text/jsx">
+class WorkoutListing extends React.Component {
+    render() {
+        return (
+            <div>
+            <a href={this.props.link}>
+            <div>
+                <h3> {this.props.title} </h3>
+                <p>Author: {this.props.username}</p>
+                <p>Rating: {this.props.rating} stars</p>
+                <p>Likes: {this.props.likes}</p>
+                <p>Dislikes: {this.props.dislikes}</p>
+            </div>
+            </a>
+            </div>
+        )
+    }
+}
+//TODO very very bad hack
+ReactDOM.render(
+    <div>
+{% for username, workout in workouts: %}
+    <WorkoutListing 
+        link={"/workout?id=" + "{{workout['workout_id']}}"}
+        title="{{workout['title']}}"
+        username="{{username}}"
+        likes="{{workout['likes']}}"
+        dislikes="{{workout['dislikes']}}"
+    />
+    
+{% endfor %}
+    </div>, 
+    document.getElementById('content'));
+</script>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %} FitList {% endblock %}
+
+{% block content %}
+<script type="text/jsx">
+class Index extends React.Component {
+    render() {
+        return (
+            <div>
+                <h1>FitList</h1>
+                <a href="/browse">Browse Workouts</a>
+            </div>
+        );
+    }
+}
+ReactDOM.render(<Index />, document.getElementById('content'));
+</script>
+{% endblock %}

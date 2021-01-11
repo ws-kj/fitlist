@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %} {{workout['title']}} | FitList {% endblock %}
+
+{% block content %}
+<script type="text/jsx">
+class Workout extends React.Component {
+    render() {
+        return (
+            <div>
+                <h3> {this.props.title} </h3>
+                <p>Author: {this.props.username}</p>
+                <p>Rating: {this.props.rating} stars</p>
+                <p>Likes: {this.props.likes}</p>
+                <p>Dislikes: {this.props.dislikes}</p>
+                <p>Tags: {this.props.tags}</p>
+                <p>Frequency: {this.props.frequency} days a week</p>
+                <br/>
+                <p>{this.props.content}</p>
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(
+    <Workout
+        title="{{workout['title']}}"
+        author="{{username}}"
+        rating="{{workout['stars']}}"
+        likes="{{workout['likes']}}"
+        dislikes="{{workout['dislikes']}}"
+        tags="{{workout['tags']}}"
+        frequency="{{workout['frequency']}}"
+        content="{{workout['content']}}"
+    />,
+    document.getElementById('content')
+);
+
+</script>
+{% endblock %}
