@@ -12,15 +12,25 @@ class SignupForm extends React.Component {
             email: '',
             pass_plain: '',
             pass_conf: '',
+            errors: []
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handle_change = this.handle_change.bind(this);
+        this.handle_submit = this.handle_submit.bind(this);
+        this.handle_result = this.handle_result.bind(this); 
         this.pass_match = false;
         this.pass_req = false;
         this.can_submit = false;
     }
 
-    handleChange(event) {
+    handle_result(response) {
+        if(response['data']['success'] == 1) {
+            window.location.href = response['data']['redirect'];
+        } else {
+            this.setState({errors: response['data']['errors']});
+        }
+    }
+
+    handle_change(event) {
         const target = event.target;
         const value = target.value;
         const name = target.name;
@@ -42,23 +52,17 @@ class SignupForm extends React.Component {
         }
     }
 
-    handleSubmit(event) {
+    handle_submit(event) {
         event.preventDefault();
-/*
-        if(this.state.pass_plain != this.state.pass_conf) {
-           this.pass_match = false;
-           return;
-        } else {
-            this.pass_match = true;
-        }
-*/
+        var self = this; //this is a bad cheat
         axios.post('user_created', {
             username: this.state.username,
             email: this.state.email,
-            password: this.state.pass_plain
-        })
+            pass_plain: this.state.pass_plain,
+            pass_conf: this.state.pass_conf
+        }) 
         .then(function (response) {
-            console.log(response);
+            self.handle_result(response);
         })
         .catch(function (error) {
             console.log(error);
@@ -68,15 +72,16 @@ class SignupForm extends React.Component {
     render() {
         return (
             <div>
-            <form autocomplete="off" onSubmit={this.handleSubmit}>
+            <form autocomplete="off" onSubmit={this.handle_submit}>
                     Username 
-                    <input type="text" name="username" value={this.state.username} onChange={this.handleChange}/>
+                    <input type="text" name="username" value={this.state.username} onChange={this.handle_change}/>
                     Email Address
-                    <input type="text" name="email" value={this.state.email} onChange={this.handleChange}/>
+                    <input type="text" name="email" value={this.state.email} onChange={this.handle_change}/>
                     Password
-                    <input type="password" name="pass_plain" value={this.state.pass_plain} onChange={this.handleChange}/>
+                    <input type="password" name="pass_plain" value={this.state.pass_plain} onChange={this.handle_change}/>
                     Confirm Password
-                    <input type="password" name="pass_conf" value={this.state.pass_conf} onChange={this.handleChange}/>
+                    <input type="password" name="pass_conf" value={this.state.pass_conf} onChange={this.handle_change}/>
+                     {this.state.errors}
                     {this.pass_match && <p>Passwords do not match</p>}
                 <input type="submit" id="submit" disabled={!this.can_submit} value="Sign Up"/>
             </form>

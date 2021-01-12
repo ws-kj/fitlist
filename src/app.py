@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_cors import CORS
 import db
 import bcrypt
+import re
 
 #nice path trick for bottle. thanks niles!
 #sys.path.insert(0, ".");
@@ -15,6 +16,8 @@ app = Flask(__name__)
 CORS(app)
 
 db.init()
+
+email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 
 def user_from_id(uid):
     q = db.query("select * from users where user_id=?", str(uid));
@@ -91,9 +94,35 @@ def user_created():
         data = request.get_json()
         username = data.get('username')
         email = data.get('email')
-        pass_plain = data.get('password');
-       
+        pass_plain = data.get('pass_plain')
+        pass_conf = data.get('pass_conf')
       
+        print(username)
+        print(email)
+        print(pass_plain)
+        print(pass_conf)
+
+        errors = []      
+        can_create = True
+
+        if len(username) < 4 or " " in username:
+            errors.append("Username must be at least four characters long and cannot include spaces")
+        
+        if len(pass_plain) < 8 or " " in pass_plain:
+            errors.append("Password must be at least eight characters long and cannot include spaces")
+        
+        if pass_plain != pass_conf:
+            errors.append("Passwords must match");
+
+        if not re.search(email_regex, email):
+            errors.append("Email must be valid")
+
+        if len(errors) > 0:
+            can_create = False
+        
+
+        if not can_create:
+            return jsonify({'success': 0, 'redirect': '', 'errors': errors});
 
         password = bcrypt.hashpw(pass_plain.encode(), bcrypt.gensalt())
         db.execute("""
@@ -105,7 +134,7 @@ def user_created():
             username, password, email
         )
 
-        return redirect(url_for('browse'))
-    return signup()
+        return jsonify({'success': 1, 'redirect': url_for('browse'), 'errors': []});
+    return render_template("signup.html")
 
 app.run(port=8080, debug=True)
