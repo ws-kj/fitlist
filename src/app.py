@@ -117,6 +117,14 @@ def user_created():
         if not re.search(email_regex, email):
             errors.append("Email must be valid")
 
+        unq = db.query("""select * from users where username == ?""", username)
+        if len(unq) > 0:
+            errors.append("Username already in use")
+
+        emq = db.query("""select * from users where email == ?""", email)
+        if len(emq) > 0:
+            errors.append("Email already in use")
+
         if len(errors) > 0:
             can_create = False
         
