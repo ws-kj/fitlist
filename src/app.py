@@ -62,10 +62,24 @@ def create_workout():
 def workout_created():
     if request.method == 'POST':
         data = request.get_json()
-        title = data.get('title')
+        title = data.get('title').strip()
         content = data.get('content')
         freq = data.get('frequency')
         tags = data.get('tags')
+
+        errors = []
+        can_create = True
+
+        tq = db.query("""select * from workouts where title == ?""", title)
+        if len(tq) > 0:
+            errors.append("Title already in use")
+
+
+
+        if len(errors) > 0:
+            return jsonify({'success': 0, 'redirect': '', 'errors': errors})
+
+        
 
         db.execute("""
             insert into workouts (
@@ -81,7 +95,7 @@ def workout_created():
             group by workout_id
         """)[0]['workout_id']
 
-        return redirect(url_for('workout', id=wid))
+        return jsonify({'success': 1, 'redirect': url_for('browse', id=wid), 'errors': []})
     return browse()
 
 @app.route("/signup")

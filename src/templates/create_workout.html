@@ -12,20 +12,36 @@ class CreateWorkoutForm extends React.Component {
             content: '',
             frequency: 0,
             tags: '',
-            tag_array: []
+            tag_array: [],
+            errors: []
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handle_change = this.handle_change.bind(this);
+        this.handle_submit = this.handle_submit.bind(this);
+        this.handle_result = this.handle_result.bind(this);
     }
 
-    handleChange(event) {
+    handle_result(response) {
+        if(response['data']['success'] == 1) {
+            window.location.href = response['data']['redirect'];
+        } else {
+            this.setState({errors: response['data']['errors']});
+        }
+    }
+
+
+    handle_change(event) {
         const target = event.target;
         const value = target.value;
         const name = target.name;
-
+/*
+        if(name == "title") {
+            value = value.trim();
+        }
+*/
         this.setState({
             [name]: value
         });
+       
 
         if(name =="tags") {
             this.state.tag_array = value.trim().split(',');
@@ -34,9 +50,9 @@ class CreateWorkoutForm extends React.Component {
 
     }
 
-    handleSubmit(event) {
+    handle_submit(event) {
         event.preventDefault();
-        
+        var self = this; 
         axios.post('workout_created', {
             title: this.state.title,
             content: this.state.content,
@@ -44,7 +60,7 @@ class CreateWorkoutForm extends React.Component {
             tags: this.state.tag_array
         })
         .then(function (response) {
-            console.log(response);
+            self.handle_result(response);
         })
         .catch(function (error) {
             console.log(error);
@@ -54,13 +70,13 @@ class CreateWorkoutForm extends React.Component {
     render() {
         return (
             <div>
-            <form onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handle_submit}>
                     Title 
-                    <input type="text" name="title" value={this.state.title} onChange={this.handleChange}/>
+                    <input type="text" name="title" value={this.state.title} onChange={this.handle_change}/>
                     Content 
-                    <textarea type="text" name="content" value={this.state.content} onChange={this.handleChange}/>
+                    <textarea type="text" name="content" value={this.state.content} onChange={this.handle_change}/>
                     Frequency
-                    <select name="frequency" value={this.state.frequency} onChange={this.handleChange}>
+                    <select name="frequency" value={this.state.frequency} onChange={this.handle_change}>
                         <option>0</option>
                         <option>1</option>
                         <option>2</option>
@@ -71,8 +87,9 @@ class CreateWorkoutForm extends React.Component {
                         <option>7</option>
                     </select>
                     Tags
-                    <textarea type="text" name="tags" value={this.state.tags} onChange={this.handleChange}/>
+                    <textarea type="text" name="tags" value={this.state.tags} onChange={this.handle_change}/>
                 <input type="submit" value="Create"/>
+                {this.state.errors}
             </form>
             </div>
         )
