@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %} Login | FitList {% endblock %}
+
+{% block content %}
+<script type="text/jsx">
+class SignupForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            username: '',
+            pass_plain: '',
+            errors: []
+        };
+        this.handle_change = this.handle_change.bind(this);
+        this.handle_submit = this.handle_submit.bind(this);
+        this.handle_result = this.handle_result.bind(this); 
+        this.pass_req = false;
+        this.can_submit = false;
+    }
+
+    handle_result(response) {
+        if(response['data']['success'] == 1) {
+            window.location.href = response['data']['redirect'];
+        } else {
+            this.setState({errors: response['data']['errors']});
+        }
+    }
+
+    handle_change(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+
+
+        if(value.indexOf(' ') > -1) {
+            return;
+        }
+
+        this.setState({
+            [name]: value
+        });
+
+        
+        if(this.state.pass_plain && this.state.username) {
+            this.can_submit = true;
+        } else {
+            this.can_submit = false;
+        }
+    }
+
+    handle_submit(event) {
+        event.preventDefault();
+        var self = this; //this is a bad cheat
+        axios.post('attempt_login', {
+            username: this.state.username,
+            pass_plain: this.state.pass_plain,
+        }) 
+        .then(function (response) {
+            self.handle_result(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    render() {
+        return (
+            <div>
+            <form autocomplete="off" onSubmit={this.handle_submit}>
+                    Username 
+                    <input type="text" name="username" value={this.state.username} onChange={this.handle_change}/>
+                    Password
+                    <input type="password" name="pass_plain" value={this.state.pass_plain} onChange={this.handle_change}/>
+                     {this.state.errors}
+                <input type="submit" id="submit" disabled={!this.can_submit} value="Log In"/>
+            </form>
+            </div>
+        )
+    }
+}
+ReactDOM.render(<SignupForm />, document.getElementById('content'));
+</script>
+{% endblock %}
