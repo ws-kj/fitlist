@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, time, io
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_cors import CORS
 import db
 import bcrypt
@@ -13,6 +13,7 @@ import re
 #root = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
+app.secret_key = os.urandom(12).hex()
 CORS(app)
 
 db.init()
@@ -23,13 +24,40 @@ def user_from_id(uid):
     q = db.query("select * from users where user_id=?", str(uid));
     return q[0];
 
+def verify_session():
+
+    if not 'logged_in' in session or not 'username' in session or not 'password' in session:
+        return False
+        
+    if not session['logged_in']:
+        return False
+
+    pw = session['password'] 
+    un = session['username']
+
+    q = db.query("""select * from users where username == ?""", un)
+    if len(q) == 0:
+        return False
+    
+    q = db.query("""select password from users where username == ?""", un)
+    if q[0] != pw:
+        return False
+
+    return True
+
 @app.route("/index")
 @app.route("/")
 def index():
+    if not verify_session():
+        return redirect(url_for('signup'))
+
     return render_template("index.html")
 
 @app.route("/workout", methods=['GET'])
 def workout():
+    if not verify_session():
+        return redirect(url_for('signup'))
+
     if request.method == 'GET':
         wid = request.args.get('id')
         if wid == None:
@@ -47,6 +75,9 @@ def workout():
 
 @app.route("/browse")
 def browse():
+    if not verify_session():
+        return redirect(url_for('signup'))
+
     wouts = db.query("select * from workouts");
     unames = []
     for wout in wouts:
@@ -56,14 +87,20 @@ def browse():
 
 @app.route("/create_workout")
 def create_workout():
+    if not verify_session():
+        return redirect(url_for('signup'))
+
     return render_template("create_workout.html")
 
 @app.route("/workout_created", methods=['POST'])
 def workout_created():
+    if not verify_session():
+        return redirect(url_for('signup'))
+
     if request.method == 'POST':
         data = request.get_json()
         title = data.get('title').strip()
-        content = data.get('content')
+        content = data.get('content').strip()
         freq = data.get('frequency')
         tags = data.get('tags')
 
@@ -74,12 +111,8 @@ def workout_created():
         if len(tq) > 0:
             errors.append("Title already in use")
 
-
-
         if len(errors) > 0:
             return jsonify({'success': 0, 'redirect': '', 'errors': errors})
-
-        
 
         db.execute("""
             insert into workouts (
@@ -111,11 +144,6 @@ def user_created():
         pass_plain = data.get('pass_plain')
         pass_conf = data.get('pass_conf')
       
-        print(username)
-        print(email)
-        print(pass_plain)
-        print(pass_conf)
-
         errors = []      
         can_create = True
 
@@ -155,6 +183,10 @@ def user_created():
             )""",
             username, password, email
         )
+        
+        session['logged_in'] = True
+        session['password'] = password
+        session['username'] = username
 
         return jsonify({'success': 1, 'redirect': url_for('browse'), 'errors': []});
     return render_template("signup.html")
