@@ -1,2 +1,48 @@
-<p>FitList</p>
-<hr>
+<script type="text/jsx">
+class LoginStatus extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            login: 0
+        };
+
+        this.handle_change = this.handle_change.bind(this);
+    }
+
+    handle_change(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+
+        this.setState({
+            [name]: value
+        });
+    }
+   
+    componentDidMount() { 
+        var self = this; // bad cheat i hate js so much
+        axios.post('login_status', {
+        })
+        .then(function (response) {
+            self.setState({'login': response['data']['status']});
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    render() {
+        return (
+            <div>
+                <p>FitList</p>
+                {this.state.login == 0 ? <a href='/login'><p>Log In</p></a> : <a href='/logout'><p>Log Out</p></a>}
+                <hr />
+            </div>
+        )
+    }
+}
+ReactDOM.render(<LoginStatus />, document.getElementById('header-content'))
+</script>
+<div id='header-content'>
+</div>
