@@ -4,7 +4,7 @@
 
 {% block content %}
 <script type="text/jsx">
-class SignupForm extends React.Component {
+class LoginForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -15,8 +15,13 @@ class SignupForm extends React.Component {
         this.handle_change = this.handle_change.bind(this);
         this.handle_submit = this.handle_submit.bind(this);
         this.handle_result = this.handle_result.bind(this); 
+        this.redir_signup = this.redir_signup.bind(this);
         this.pass_req = false;
         this.can_submit = false;
+    }
+
+    redir_signup() {
+        window.location.href = '/signup';
     }
 
     handle_result(response) {
@@ -66,19 +71,20 @@ class SignupForm extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className='container card'>
             <form autocomplete="off" onSubmit={this.handle_submit}>
                     Username 
                     <input type="text" name="username" value={this.state.username} onChange={this.handle_change}/>
                     Password
                     <input type="password" name="pass_plain" value={this.state.pass_plain} onChange={this.handle_change}/>
                      {this.state.errors}
+                <input type="button" value="Sign Up" onClick={this.redir_signup}/>
                 <input type="submit" id="submit" disabled={!this.can_submit} value="Log In"/>
             </form>
             </div>
         )
     }
 }
-ReactDOM.render(<SignupForm />, document.getElementById('content'));
+ReactDOM.render(<LoginForm />, document.getElementById('content'));
 </script>
 {% endblock %}
