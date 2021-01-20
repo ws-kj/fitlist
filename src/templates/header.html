@@ -44,7 +44,9 @@ class LoginStatus extends React.Component {
     render() {
         return (
             <div className='header'>
-                <p className='header-element'>FitList</p>
+                <p className='header-element'><a href='/index'>FitList</a></p>
+                <p className='header-element'><a href='/browse'>Browse</a></p>
+                <p className='header-element'><a href='/create_workout'>Create</a></p>
                 {this.state.login == 0 ? 
                     <input type='button' value='Log In' onClick={this.redir} className='login'/>
                     : 

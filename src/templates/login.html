@@ -72,6 +72,7 @@ class LoginForm extends React.Component {
     render() {
         return (
             <div className='container card'>
+            <h2>Log In</h2>
             <form autocomplete="off" onSubmit={this.handle_submit}>
                     Username 
                     <input type="text" name="username" value={this.state.username} onChange={this.handle_change}/>

@@ -70,6 +70,7 @@ class CreateWorkoutForm extends React.Component {
     render() {
         return (
             <div className='container card'>
+            <h2>Create Workout</h2>
             <form onSubmit={this.handle_submit}>
                     Title 
                     <input type="text" name="title" value={this.state.title} onChange={this.handle_change}/>
