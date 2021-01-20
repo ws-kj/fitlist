@@ -8,6 +8,15 @@ class LoginStatus extends React.Component {
         };
 
         this.handle_change = this.handle_change.bind(this);
+        this.redir =  this.redir.bind(this);
+    }
+
+    redir() {
+        if(this.state.login == 0) {
+            window.location.href = '/login';
+        } else {
+            window.location.href = '/logout';
+        }
     }
 
     handle_change(event) {
@@ -36,7 +45,11 @@ class LoginStatus extends React.Component {
         return (
             <div className='header'>
                 <p className='header-element'>FitList</p>
-                {this.state.login == 0 ? <a href='/login'><p className='button login'>Log In</p></a> : <a href='/logout'><p className='button login'>Log Out</p></a>}
+                {this.state.login == 0 ? 
+                    <input type='button' value='Log In' onClick={this.redir} className='login'/>
+                    : 
+                    <input type='button' value='Log Out' onClick={this.redir} className='login'/>
+                }
             </div>
         )
     }
