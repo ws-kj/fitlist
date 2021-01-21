@@ -10,7 +10,8 @@ class LoginForm extends React.Component {
         this.state = {
             username: '',
             pass_plain: '',
-            errors: []
+            errors: [],
+            handled_errors: [],
         };
         this.handle_change = this.handle_change.bind(this);
         this.handle_submit = this.handle_submit.bind(this);
@@ -29,6 +30,12 @@ class LoginForm extends React.Component {
             window.location.href = response['data']['redirect'];
         } else {
             this.setState({errors: response['data']['errors']});
+            var res = [];
+            for(var i=0; i<this.state.errors.length; i++) {
+                res.push(<p>{this.state.errors[i]}</p>);
+            }
+            this.setState({handled_errors: res});
+            console.log(this.state.handled_errors);
         }
     }
 
@@ -36,7 +43,6 @@ class LoginForm extends React.Component {
         const target = event.target;
         const value = target.value;
         const name = target.name;
-
 
         if(value.indexOf(' ') > -1) {
             return;
@@ -78,7 +84,9 @@ class LoginForm extends React.Component {
                     <input type="text" name="username" value={this.state.username} onChange={this.handle_change}/>
                     Password
                     <input type="password" name="pass_plain" value={this.state.pass_plain} onChange={this.handle_change}/>
-                     {this.state.errors}
+                     { this.state.errors.length > 0 &&
+                     <div className='container'>{this.state.handled_errors}</div>
+                     }
                 <input type="button" value="Sign Up" onClick={this.redir_signup}/>
                 <input type="submit" id="submit" disabled={!this.can_submit} value="Log In"/>
             </form>
