@@ -16,6 +16,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
 CORS(app)
 
+
 db.init()
 
 email_regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
@@ -65,7 +66,14 @@ def workout():
             uname = u['username'];
         else:
             return browse()
-        return render_template("workout.html", workout=wout, username=uname)
+
+        r = db.query("select * from reviews where workout_id=?", str(wid))
+        if len(r) < 1:
+            revs = -1
+        else:
+            revs = jsonify(r)
+
+        return render_template("workout.html", workout=wout, username=uname, reviews=revs)
     else:
         return browse()
 
@@ -243,6 +251,15 @@ def login_status():
         return jsonify({'status': 1})
     else:
         return jsonify({'status': 0})
+
+@app.route('/get_reviews', methods=['POST'])
+def get_reviews():
+    if request.method == 'POST':
+        data = request.get_json()
+        wid = data.get('wid')
+
+        q = db.query("select * from reviews where workout_id == ?", wid)
+        return jsonify(q) 
 
 app.run(port=8080, debug=True)
 session.clear()

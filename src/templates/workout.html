@@ -3,11 +3,119 @@
 
 {% block content %}
 <script type="text/jsx">
+
+class Review extends React.Component {
+    render() {
+        return(
+            <div className='container card'>
+                <h3>{this.props.title}</h3>
+                <p>{this.props.date}</p>
+                <p>{this.props.rating} stars</p>
+                <p>Likes: {this.props.likes}</p>
+                <p>Dislikes: {this.props.dislikes}</p>
+                <hr />
+                <p>{this.props.content}</p>
+            </div>
+        )
+    }
+}
+
 class Workout extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            rev_title: '',
+            rev_rating: 0,
+            rev_content: '',
+            errors: [],
+            handled_errors: [],
+            handled_reviews: [],
+        };
+
+        this.handle_change = this.handle_change.bind(this);
+        this.handle_submit = this.handle_submit.bind(this);
+        this.handle_result = this.handle_result.bind(this);
+
+        this.bind_reviews = this.bind_reviews.bind(this);
+        this.reviews = [];
+
+        var self = this;
+
+        axios.post('get_reviews', {
+            wid: {{workout['workout_id']}},
+        })
+        .then(function (response) {
+            self.bind_reviews(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    bind_reviews(response) {
+        this.reviews = response['data'];
+        var handled = [];
+        for(let r of this.reviews) {
+            console.log(r);
+            handled.push(<Review
+                title={r['title']}
+                date={r['created_date']}
+                likes={r['likes']}
+                dislikes={r['dislikes']}
+                rating={r['stars']}
+                content={r['content']}
+            />);
+            this.setState({handled_reviews: handled});
+        }
+    }
+
+    handle_result(response) {
+        if(response['data']['success'] == 1) {
+            window.location.href = response['data']['redirect'];
+        } else {
+            this.setState({errors: response['data']['errors']});
+            var res = [];
+            for(var i=0; i<this.state.errors.length; i++) {
+                res.push(<p>{this.state.errors[i]}</p>);
+            }
+            this.setState({handled_errors: res});
+            console.log(this.state.handled_errors);
+        }
+    }
+
+    handle_change(event) {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+
+        this.setState({
+            [name]: value
+        });
+    }
+
+    handle_submit(event) {
+        event.preventDefault();
+        var self=this;
+        axios.post('review_created', {
+            wid: {{workout['workout_id']}},
+            title: this.state.rev_title,
+            rating: this.state.rev_rating,
+            content: this.state.rev_content
+        })
+        .then(function (response) {
+            self.handle_result(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
     render() {
         return (
             <div>
-                <h3> {this.props.title} </h3>
+            <div className='container full'>
+                <h2> {this.props.title} </h2>
                 <p>Author: {this.props.username}</p>
                 <p>Rating: {this.props.rating} stars</p>
                 <p>Likes: {this.props.likes}</p>
@@ -16,6 +124,32 @@ class Workout extends React.Component {
                 <p>Frequency: {this.props.frequency} days a week</p>
                 <br/>
                 <p>{this.props.content}</p>
+            </div>
+            <div className='container card'>
+            <h2>Write a Review</h2>
+            <form onSubmit={this.handle_submit}>
+                Title
+                <input type='text' name='title' value={this.state.rev_title} onChange={this.handle_change}/>
+                Rating
+                <select name="rating" value={this.state.rev_rating} onChange={this.handle_change}>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>9</option>
+                    <option>10</option>
+                </select>
+                <textarea type='text' name='content' value={this.state.rev_content} onChange={this.handle_change}/>
+                {this.state.errors.length > 0 &&
+                <div className='container'>{this.state.handled_errors}</div>
+                }
+                <input type="submit" value="Create"/>
+            </form>
+            </div>
+            {this.state.handled_reviews}
             </div>
         )
     }
